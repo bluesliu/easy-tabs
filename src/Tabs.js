@@ -2,7 +2,7 @@ import React,{Component} from "react";
 import PropTypes from "prop-types";
 
 import "./easy-tabs.css";
-import TabBar from "./TabBar";
+import TabNav from "./TabNav";
 
 export default class Tabs extends Component {
     static propTypes = {
@@ -24,14 +24,16 @@ export default class Tabs extends Component {
         this.state = {
             selectedKey : this.props.selectedKey,
             tabs : this.props.tabs
-        }
+        };
     }
+
+
 
     render() {
         const {selectedKey, tabs} = this.state;
         return (
             <div className="easy-tabs">
-                <TabBar selectedKey={selectedKey}
+                <TabNav selectedKey={selectedKey}
                         showCloseButton={true}
                         tabs={tabs}
                         onChange={this.onTabChange}
