@@ -5,16 +5,16 @@ import "./easy-tabs.css";
 import TabPane from "./TabPane";
 import TabNav from "./TabNav";
 import Tab from "./Tab";
+import TabInfo from "./TabInfo";
 
 export default class Tabs extends Component {
     static propTypes = {
         selectedKey : PropTypes.string,
-        tabs : PropTypes.array
+        onChange : PropTypes.func
     };
 
     static defaultProps = {
-        selectedKey : "",
-        tabs : []
+        selectedKey : ""
     };
 
     constructor(props) {
@@ -25,11 +25,16 @@ export default class Tabs extends Component {
         const newChildren = this.mapChildren(this.props.children);
         const tabs = this.parseTabs(newChildren);
 
-
         this.state = {
             selectedKey : this.props.selectedKey,
             tabs : tabs
         };
+    }
+
+    componentWillReceiveProps(nextProps, nextContext) {
+        const newChildren = this.mapChildren(nextProps.children);
+        this.state.tabs = this.parseTabs(newChildren);
+        this.state.selectedKey = nextProps.selectedKey;
     }
 
     mapChildren(children){
@@ -51,7 +56,7 @@ export default class Tabs extends Component {
         const {className} = this.props;
         for (let i = 0; i < children.length; i++) {
             const element = children[i];
-            const {children:content, ...oldProps} = element.props;
+            const {children:content, title, ...oldProps} = element.props;
             let key = parseKey(element);
             if(!key){
                 key = i.toString();
@@ -60,9 +65,10 @@ export default class Tabs extends Component {
                 key : key,
                 className : className,
                 content : content
-            };console.log(content)
+            };
             const mergeProps = Object.assign({}, oldProps, newProps);
-            const tab = {title: mergeProps.title, key: mergeProps.key};
+            // const tab = {title: mergeProps.title, key: mergeProps.key};
+            const tab = new TabInfo(key, title);
             tabs.push(tab);
         }
         return tabs;
@@ -80,22 +86,11 @@ export default class Tabs extends Component {
                         tabs={tabs}
                         onChange={this.onTabChange}
                         onClose={this.onTabClose}/>
-                {/*{this.renderTabNav()}*/}
                 <div>
                     content
                 </div>
             </div>
         )
-    }
-
-    renderTabNav() {
-
-console.log(tabs)
-        return <TabNav selectedKey={selectedKey}
-                       showCloseButton={true}
-                       tabs={tabs}
-                       onChange={this.onTabChange}
-                       onClose={this.onTabClose}/>
     }
 
     onTabChange(key) {
@@ -105,31 +100,16 @@ console.log(tabs)
         });
     }
 
-    onTabClose(key) {
-        let {tabs, selectedKey} = this.state;
-        for (let i = tabs.length-1; i >= 0; i--) {
-            const tab = tabs[i];
-            if(tabs[i].key === key){
-                 tabs.splice(i, 1);
-                if(tab.key === selectedKey){
-                    if(tabs[i-1]){
-                        selectedKey = tabs[i-1].key;
-                    }
-                    else if(tabs[i]){
-                        selectedKey = tabs[i].key;
-                    }
-                    else{
-                        selectedKey = "";
-                    }
-                }
-                break;
-            }
-        }
+    onTabClose(selectedKey, tabInfoList) {
         this.setState({
             ...this.state,
-            tabs : tabs,
+            tabs : tabInfoList,
             selectedKey : selectedKey
-        })
+        });
+        const {onChange} = this.props;
+        if(onChange){
+            onChange.call(this, selectedKey, tabInfoList);
+        }
     }
 }
 

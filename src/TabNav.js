@@ -36,16 +36,16 @@ export default class TabNav extends Component {
         this.dragDelay = 200;
         this.needUpdateRect = false;
 
-        const tabInfoList = [];
-        for (let i = 0; i < this.props.tabs.length; i++) {
-            tabInfoList.push(new TabInfo(
-                this.props.tabs[i].key,
-                this.props.tabs[i].title,
-                ));
-        }
+        // const tabInfoList = [];
+        // for (let i = 0; i < this.props.tabs.length; i++) {
+        //     tabInfoList.push(new TabInfo(
+        //         this.props.tabs[i].key,
+        //         this.props.tabs[i].title,
+        //         ));
+        // }
 
         this.state = {
-            tabInfoList : tabInfoList,
+            tabInfoList : this.props.tabs,
             hideKeys : [],          // 隐藏的 tabs
             drag : false,           // 当前是否处于拖拽中
         };
@@ -114,7 +114,7 @@ export default class TabNav extends Component {
             }
             if(!find){
                 lastIdx += 1;
-                tabInfoList.splice(lastIdx, 0, new TabInfo(tabs[i].key, tabs[i].title))
+                tabInfoList.splice(lastIdx, 0, tabs[i])
             }
         }
         this.state.tabInfoList = tabInfoList;
@@ -250,12 +250,6 @@ export default class TabNav extends Component {
         document.removeEventListener('mousemove', this.onMouseMoveHandler);
         document.removeEventListener('mouseup', this.onMouseUpHandler);
 
-        // const {tabInfoList, hideKeys} = this.state;
-        // for (let i = 0; i < tabInfoList.length; i++) {
-        //     if(hideKeys.indexOf(tabInfoList[i].key)!==-1){
-        //         tabInfoList[i].updateRect();
-        //     }
-        // }
         this.needUpdateRect = true;
         this.setState({
             ...this.state,
@@ -264,10 +258,28 @@ export default class TabNav extends Component {
     }
 
     onTabClose(key) {
-        const {onClose} = this.props;
-        if(onClose){
-            onClose.call(this, key);
+        let {tabInfoList} = this.state;
+        let {selectedKey} = this.props;
+        for (let i = tabInfoList.length-1; i >= 0; i--) {
+            const tab = tabInfoList[i];
+            if(tab.key === key){
+                tabInfoList.splice(i, 1);
+                if(tab.key === selectedKey){
+                    if(tabInfoList[i-1]){
+                        selectedKey = tabInfoList[i-1].key;
+                    }
+                    else if(tabInfoList[i]){
+                        selectedKey = tabInfoList[i].key;
+                    }
+                    else{
+                        selectedKey = "";
+                    }
+                }
+                break;
+            }
         }
+        const {onClose} = this.props;
+        onClose.call(this, selectedKey, tabInfoList);
     }
 
     onMoreTabDidMount(key, rect) {
