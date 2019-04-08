@@ -4,7 +4,6 @@
 import React, {Component} from "react";
 import PropTypes from "prop-types";
 import classname from "classnames";
-import ReactDOM from "react-dom";
 
 export default class MoreTab extends Component {
 
@@ -13,7 +12,6 @@ export default class MoreTab extends Component {
     static propTypes = {
         className : PropTypes.string,
         onClick : PropTypes.func,
-        onDidMount : PropTypes.func,
     };
 
     static defaultProps = {};
@@ -21,15 +19,6 @@ export default class MoreTab extends Component {
     constructor(props){
         super(props);
         this.onClickHandler = this.onClickHandler.bind(this);
-    }
-
-    componentDidMount() {
-        const {onDidMount} = this.props;
-        if(onDidMount) {
-            const ele = ReactDOM.findDOMNode(this);
-            const rect = ele.getBoundingClientRect();
-            onDidMount.call(this, MoreTab.KEY, rect);
-        }
     }
 
     render() {

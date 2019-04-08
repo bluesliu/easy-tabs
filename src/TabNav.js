@@ -45,7 +45,6 @@ export default class TabNav extends Component {
 
         this.onTabDown = this.onTabDown.bind(this);
         this.onTabClose = this.onTabClose.bind(this);
-        this.onTabDidMount = this.onTabDidMount.bind(this);
 
         this.onMouseMoveHandler = this.onMouseMoveHandler.bind(this);
         this.onMouseUpHandler = this.onMouseUpHandler.bind(this);
@@ -176,7 +175,6 @@ export default class TabNav extends Component {
         if (!this.tabSizeMap.get(MoreTab.KEY) || hideKeys.length > 0) {
             return <MoreTab ref={this.getTabRef(MoreTab.KEY)}
                             className={className}
-                            onDidMount={this.onTabDidMount}
                             onClick={this.onTabDown}/>
         }
         return null;
@@ -201,7 +199,6 @@ export default class TabNav extends Component {
                            selected={tabKey === activeKey}
                            onDown={this.onTabDown}
                            onClose={this.onTabClose}
-                           onDidMount={this.onTabDidMount}
                            opacity={activeKey === tabKey && drag ? 0 : 1}
             />;
         }
@@ -304,10 +301,6 @@ export default class TabNav extends Component {
         if(onClose){
             onClose.call(this, key);
         }
-    }
-
-    onTabDidMount(key, rect) {
-        this.tabSizeMap.set(key, rect);
     }
 
     getTabRef(key) {
