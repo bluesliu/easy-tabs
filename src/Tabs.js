@@ -5,7 +5,6 @@ import ResizeObserver from "resize-observer-polyfill"
 import "./easy-tabs.css";
 import TabPane from "./TabPane";
 import TabNav from "./TabNav";
-import TabInfo from "./TabInfo";
 import classname from "classnames";
 import ReactDOM from "react-dom";
 
