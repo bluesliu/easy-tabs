@@ -1,12 +1,13 @@
 import React,{Component} from "react";
+import classname from "classnames";
+import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import ResizeObserver from "resize-observer-polyfill"
 
 import "./easy-tabs.css";
 import TabPane from "./TabPane";
 import TabNav from "./TabNav";
-import classname from "classnames";
-import ReactDOM from "react-dom";
+import TabContent from "./TabContent";
 
 export default class Tabs extends Component {
     static propTypes = {
@@ -49,8 +50,8 @@ export default class Tabs extends Component {
             if (!element) {
                 return null;
             }
-            const { type:elementType } = element;
-            if (elementType !== TabPane ) {
+            const {type: elementType} = element;
+            if (elementType !== TabPane) {
                 console.warn("警告: Tabs 的子组件类型必须是 Tabs.TabPane");
                 return null;
             }
@@ -65,7 +66,7 @@ export default class Tabs extends Component {
         });
 
         const classNames = classname("easy-tabs",
-            {[className]: className!==undefined});
+            {[className]: className !== undefined});
         return (
             <div className={classNames}>
                 <TabNav className={className}
@@ -75,6 +76,9 @@ export default class Tabs extends Component {
                         onClose={this.onTabClose}
                         onSort={this.onTabSort}
                         panes={panes}/>
+                <TabContent>
+                    {panes.filter((pane)=>{return pane.props.tabKey===activeKey}, this)[0].props.children}
+                </TabContent>
             </div>
         )
     }
