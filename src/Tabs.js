@@ -67,7 +67,6 @@ export default class Tabs extends Component {
 
         const classNames = classname("easy-tabs",
             {[className]: className!==undefined});
-
         return (
             <div className={classNames}>
                 <TabNav className={className}
@@ -75,6 +74,7 @@ export default class Tabs extends Component {
                         showCloseButton={editable}
                         onChange={this.onTabChange}
                         onClose={this.onTabClose}
+                        onSort={this.onTabSort}
                         panes={panes}/>
             </div>
         )

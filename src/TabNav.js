@@ -7,7 +7,6 @@ import PropTypes from "prop-types";
 
 import Tab from "./Tab";
 import MoreTab from "./MoreTab";
-import TabInfo from "./TabInfo";
 import TimerHelper from "./TimerHelper";
 import classname from "classnames";
 
@@ -37,9 +36,7 @@ export default class TabNav extends Component {
         this.dragDelay = 200;
         this.tabSizeMap = new Map();
         this.tabRefMap = new Map();
-        this.renderFlag = null;         //标记本次渲染的触发者
-        this.needSynRect = true;
-        this.didMount = false;
+        this.isFirst = true;
 
         this.state = {
             hideKeys : [],          // 隐藏的 panes
@@ -55,26 +52,35 @@ export default class TabNav extends Component {
     }
 
     componentDidMount() {
-        this.didMount = true;
-        console.log('componentDidMount')
-        // update hideKeys
+        this.isFirst = false;
+        this.updateRect();
         this.updateHideKeys();
     }
 
+    componentWillReceiveProps(nextProps, nextContext) {
+        this.isFirst = true;
+        this.state.hideKeys = [];
+    }
+
     componentDidUpdate(prevProps, prevState, snapshot) {
-        console.log('componentDidUpdate')
         // 初次执行 render 结束后，所有的节点都能拿到
-        // update hideKeys
-        if(this.renderFlag === null){
+        if(this.isFirst){
+            this.isFirst = false;
+            this.updateRect();
             this.updateHideKeys();
-        }
-        else{
-            this.renderFlag = null;
         }
     }
 
+    updateRect() {
+        this.tabRefMap.forEach((ref, key)=>{
+            if(ref.current){
+                const rect = ReactDOM.findDOMNode(ref.current).getBoundingClientRect();
+                this.tabSizeMap.set(key, rect);
+            }
+        },this);
+    }
+
     updateHideKeys() {
-        console.log('updateHideKeys')
         this.rect = ReactDOM.findDOMNode(this).getBoundingClientRect();
         const {tabSizeMap} = this;
         const {panes} = this.props;
@@ -82,7 +88,6 @@ export default class TabNav extends Component {
         for (let i = 0; i < panes.length; i++) {
             const {tabKey} = panes[i].props;
             const tabRect = tabSizeMap.get(tabKey);
-            console.log(tabKey, tabRect)
             let right = this.rect.right;
             if(i<panes.length-1){
                 right = this.rect.right - tabSizeMap.get(MoreTab.KEY).width;
@@ -109,7 +114,6 @@ export default class TabNav extends Component {
             needUpdate = true;
         }
         if(needUpdate){
-            this.renderFlag = 'updateHideKeys';
             this.setState({
                 hideKeys : hideKeys
             });
@@ -169,7 +173,7 @@ export default class TabNav extends Component {
     renderMoreTab() {
         const {className} = this.props;
         const {hideKeys} = this.state;
-        if (!this.didMount || hideKeys.length > 0) {
+        if (!this.tabSizeMap.get(MoreTab.KEY) || hideKeys.length > 0) {
             return <MoreTab ref={this.getTabRef(MoreTab.KEY)}
                             className={className}
                             onDidMount={this.onTabDidMount}
@@ -185,7 +189,6 @@ export default class TabNav extends Component {
         const list = [];
         for (let i = 0; i < panes.length; i++) {
             const {title, tabKey} = panes[i].props;
-
             if (hideKeys.indexOf(tabKey) !== -1) {
                 continue;
             }
@@ -267,14 +270,20 @@ export default class TabNav extends Component {
         for (let i = 0; i < panes.length; i++) {
             const orgKey = panes[i].props.tabKey;
             const newKey = newPanes[i].props.tabKey;
-            // console.log(orgKey, newKey)
             if(orgKey !== newKey){
                 isSort = true;
-                const {onSort} = this.props;
-                if(onSort){
-                    onSort.call(this, newPanes);
-                }
                 break;
+            }
+        }
+        if(isSort){
+            const {onSort} = this.props;
+            if(onSort){
+                const list = [];
+                for (let j = 0; j < newPanes.length; j++) {
+                    const {tabKey, title, children} = newPanes[j].props;
+                    list[j] = {key:tabKey, title:title, content:children};
+                }
+                onSort.call(this, list);
             }
         }
     }
@@ -284,7 +293,7 @@ export default class TabNav extends Component {
         document.removeEventListener('mousemove', this.onMouseMoveHandler);
         document.removeEventListener('mouseup', this.onMouseUpHandler);
 
-        this.needSynRect = true;
+        this.updateRect();
         this.setState({
             drag : false
         });
@@ -309,36 +318,4 @@ export default class TabNav extends Component {
         }
         return ref;
     }
-
-    getTabRect(key) {
-        const ref = this.getTabRef(key);
-        return ref.current.getBoundingClientRect();
-    }
-
-    // /**
-    //  * div 大小改变
-    //  */
-    // onResize() {
-    //     this.rect = ReactDOM.findDOMNode(this).getBoundingClientRect();
-    //     const divRect = this.rect;
-    //     // 检查 panes 的宽度是否大于 width
-    //     const {tabInfoList} = this.state;
-    //     const hideKeys = [];
-    //     for (let i = 0; i < tabInfoList.length; i++) {
-    //         let {key, rect:tabRect} = tabInfoList[i];
-    //         let right = 0;
-    //         if(this.state.hideKeys.length>0){
-    //             right = divRect.right - this.moreTabRect.width;
-    //         }else{
-    //             right = divRect.right;
-    //         }
-    //         if(tabRect.right > right){
-    //             hideKeys.push(key);
-    //         }
-    //     }
-    //     this.setState({
-    //         ...this.state,
-    //         hideKeys: hideKeys
-    //     })
-    // }
 }

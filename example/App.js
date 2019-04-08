@@ -21,6 +21,7 @@ export default class App extends Component {
         this.addTab = this.addTab.bind(this)
         this.onTabsChange = this.onTabsChange.bind(this);
         this.onTabsClose = this.onTabsClose.bind(this);
+        this.onTabsSort = this.onTabsSort.bind(this);
     }
 
     render() {
@@ -35,6 +36,7 @@ export default class App extends Component {
                 <Tabs activeKey={this.state.activeKey}
                       onChange={this.onTabsChange}
                       onClose={this.onTabsClose}
+                      onSort={this.onTabsSort}
                       className="my-easy-tabs">
                     {this.renderTabs()}
                 </Tabs>
@@ -43,15 +45,23 @@ export default class App extends Component {
     }
 
     onTabsChange(activeKey) {
+        console.log('onTabsChange')
         this.setState({activeKey:activeKey})
     }
 
     onTabsClose(closeKey) {
+        console.log('onTabsClose')
         const newState = TabsHelper.tabClose(this.state, closeKey);
         this.setState(newState);
     }
 
+    onTabsSort(panes) {
+        console.log(panes)
+        this.setState({panes:panes})
+    }
+
     addTab() {
+        console.log('addTab')
         const tabs = this.state.panes;
         const idx = tabs.length + 1;
         tabs.push({title:"title "+idx, key:idx.toString(), content:<div>{"content "+idx}</div>});
