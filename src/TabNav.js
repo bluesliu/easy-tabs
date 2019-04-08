@@ -4,127 +4,130 @@
 import React, {Component} from "react";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
-import ResizeObserver from "resize-observer-polyfill"
 
 import Tab from "./Tab";
 import MoreTab from "./MoreTab";
 import TabInfo from "./TabInfo";
 import TimerHelper from "./TimerHelper";
+import classname from "classnames";
 
 export default class TabNav extends Component {
     static propTypes = {
+        className : PropTypes.string,
         showCloseButton: PropTypes.bool,
-        selectedKey : PropTypes.string,
-        tabs : PropTypes.array,
+        activeKey : PropTypes.string,
+        panes : PropTypes.array,
         onChange : PropTypes.func,
-        onClose : PropTypes.func
+        onClose : PropTypes.func,
+        onSort : PropTypes.func
     };
 
     static defaultProps = {
         showCloseButton : false,
-        tabs : []
+        panes : []
     };
 
     constructor(props) {
         super(props);
 
         // 初始化
-        this.rect = null;
-        this.moreTabRect = null;
+        this.rect = null;               //组件自身的rect
         this.lastX = 0;
         this.dragTimeId = 0;
         this.dragDelay = 200;
-        this.needUpdateRect = false;
-
-        // const tabInfoList = [];
-        // for (let i = 0; i < this.props.tabs.length; i++) {
-        //     tabInfoList.push(new TabInfo(
-        //         this.props.tabs[i].key,
-        //         this.props.tabs[i].title,
-        //         ));
-        // }
+        this.tabSizeMap = new Map();
+        this.tabRefMap = new Map();
+        this.renderFlag = null;         //标记本次渲染的触发者
+        this.needSynRect = true;
+        this.didMount = false;
 
         this.state = {
-            tabInfoList : this.props.tabs,
-            hideKeys : [],          // 隐藏的 tabs
+            hideKeys : [],          // 隐藏的 panes
             drag : false,           // 当前是否处于拖拽中
         };
 
         this.onTabDown = this.onTabDown.bind(this);
         this.onTabClose = this.onTabClose.bind(this);
-        // this.onTabDragStart = this.onTabDragStart.bind(this);
+        this.onTabDidMount = this.onTabDidMount.bind(this);
+
         this.onMouseMoveHandler = this.onMouseMoveHandler.bind(this);
         this.onMouseUpHandler = this.onMouseUpHandler.bind(this);
-        this.onMoreTabDidMount = this.onMoreTabDidMount.bind(this);
-        this.resizeObserver = new ResizeObserver(() => {
-                this.onResize();
-        });
     }
 
     componentDidMount() {
-        this.resizeObserver.observe(ReactDOM.findDOMNode(this));
+        this.didMount = true;
+        console.log('componentDidMount')
+        // update hideKeys
+        this.updateHideKeys();
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        console.log('componentDidUpdate')
+        // 初次执行 render 结束后，所有的节点都能拿到
+        // update hideKeys
+        if(this.renderFlag === null){
+            this.updateHideKeys();
+        }
+        else{
+            this.renderFlag = null;
+        }
+    }
+
+    updateHideKeys() {
+        console.log('updateHideKeys')
+        this.rect = ReactDOM.findDOMNode(this).getBoundingClientRect();
+        const {tabSizeMap} = this;
+        const {panes} = this.props;
+        const hideKeys = [];
+        for (let i = 0; i < panes.length; i++) {
+            const {tabKey} = panes[i].props;
+            const tabRect = tabSizeMap.get(tabKey);
+            console.log(tabKey, tabRect)
+            let right = this.rect.right;
+            if(i<panes.length-1){
+                right = this.rect.right - tabSizeMap.get(MoreTab.KEY).width;
+            }
+            if(tabRect.right > right){
+                hideKeys.push(tabKey);
+            }
+        }
+
+        // 与之前的 hideKeys 比较
+        const oldHideKeys = this.state.hideKeys.concat();
+        oldHideKeys.sort((keyA, keyB)=>{return keyA<keyB?-1:1});
+        hideKeys.sort((keyA, keyB)=>{return keyA<keyB?-1:1});
+        let needUpdate = false;
+        if(hideKeys.length === oldHideKeys.length){
+            for (let i = 0; i < hideKeys.length; i++) {
+                if(hideKeys[i] !== oldHideKeys[i]){
+                    needUpdate = true;
+                    break;
+                }
+            }
+        }
+        else{
+            needUpdate = true;
+        }
+        if(needUpdate){
+            this.renderFlag = 'updateHideKeys';
+            this.setState({
+                hideKeys : hideKeys
+            });
+        }
     }
 
     componentWillUnmount() {
         document.removeEventListener('mousemove', this.onMouseMoveHandler);
         document.removeEventListener('mouseup', this.onMouseUpHandler);
-        this.resizeObserver.disconnect();
-    }
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        if(this.needUpdateRect){
-            this.needUpdateRect = false;
-            const {hideKeys, tabInfoList} = this.state;
-            for (let i = 0; i < tabInfoList.length; i++) {
-                if(hideKeys.indexOf(tabInfoList[i].key)===-1){
-                    tabInfoList[i].updateRect();
-                }
-            }
-            this.onResize();
-        }
-    }
-
-    componentWillReceiveProps(nextProps, nextContext) {
-        // 同步 tabInfoList
-        const {tabs} = nextProps;
-        const tabInfoList = this.state.tabInfoList.concat();
-        // 删除多余的tab
-        for (let i = tabInfoList.length-1; i >= 0; i--) {
-            let find = false;
-            for (let j = 0; j < tabs.length; j++) {
-                if(tabs[j].key === tabInfoList[i].key){
-                    find = true;
-                    break;
-                }
-            }
-            if(!find){
-                tabInfoList.splice(i,1);
-            }
-        }
-        // 创建新的tab
-        let lastIdx = -1;
-        for (let i = 0; i < tabs.length; i++) {
-            let find = false;
-            for (let j = 0; j < tabInfoList.length; j++) {
-                if(tabs[i].key===tabInfoList[j].key){
-                    find = true;
-                    lastIdx = j;
-                    break;
-                }
-            }
-            if(!find){
-                lastIdx += 1;
-                tabInfoList.splice(lastIdx, 0, tabs[i])
-            }
-        }
-        this.state.tabInfoList = tabInfoList;
-        this.state.hideKeys.length = 0;
-        this.needUpdateRect = true;
     }
 
     render() {
+        const {className} = this.props;
+        const classNames = classname("easy-tabs-tabNav",
+            {[`${className}-tabNav`]: className!==undefined});
+
         return (
-           <div className="easy-tabs-tabNav">
+           <div className={classNames}>
                {this.renderTabs()}
                {this.renderMoreTab()}
                {this.renderFloatTab()}
@@ -133,51 +136,70 @@ export default class TabNav extends Component {
     }
 
     renderFloatTab() {
-        const {selectedKey, showCloseButton} = this.props;
+        const {activeKey, showCloseButton, panes, className} = this.props;
         const {drag} = this.state;
         if(!drag){
             return;
         }
-
-        const info = this.getTab(selectedKey).clone();
+        let paneTitle;
+        let paneRect;
+        for (let i = 0; i < panes.length; i++) {
+            const {title, tabKey} = panes[i].props;
+            if(tabKey === activeKey){
+                paneTitle = title;
+                paneRect = this.tabSizeMap.get(activeKey);
+                break;
+            }
+        }
+        if(!paneRect){
+            return;
+        }
         const style = {};
         style.position = "fixed";
         style.filter = "drop-shadow(0px 0px 3px black)";
         style.zIndex = 100;
-        style.height = info.rect.height + "px";
-        style.top = info.rect.y;
-        style.left = Math.max(info.rect.x, this.rect.x);
-        style.left = Math.min(style.left, this.rect.width-info.rect.width+this.rect.x);
+        style.height = paneRect.height + "px";
+        style.top = paneRect.y;
+        style.left = Math.max(paneRect.x, this.rect.x);
+        style.left = Math.min(style.left, this.rect.width-paneRect.width+this.rect.x);
         style.cursor = 'grabbing';
-        return <Tab style={style} info={info} selected={true} showCloseButton={showCloseButton}/>
+        return <Tab className={className} style={style} title={paneTitle} selected={true} showCloseButton={showCloseButton}/>
     }
 
     renderMoreTab() {
+        const {className} = this.props;
         const {hideKeys} = this.state;
-        if (hideKeys.length > 0) {
-            return <MoreTab onDidMount={this.onMoreTabDidMount}
+        if (!this.didMount || hideKeys.length > 0) {
+            return <MoreTab ref={this.getTabRef(MoreTab.KEY)}
+                            className={className}
+                            onDidMount={this.onTabDidMount}
                             onClick={this.onTabDown}/>
         }
         return null;
     }
 
     renderTabs() {
-        const {selectedKey, showCloseButton} = this.props;
-        const {hideKeys, tabInfoList, drag} = this.state;
+        const {activeKey, showCloseButton, panes, className} = this.props;
+        const {hideKeys, drag} = this.state;
 
         const list = [];
-        for (let i = 0; i < tabInfoList.length; i++) {
-            const tabInfo = tabInfoList[i];
-            if (hideKeys.indexOf(tabInfo.key) !== -1) {
+        for (let i = 0; i < panes.length; i++) {
+            const {title, tabKey} = panes[i].props;
+
+            if (hideKeys.indexOf(tabKey) !== -1) {
                 continue;
             }
-            list[i] = <Tab key={tabInfo.key}
-                           info={tabInfo}
+            list[i] = <Tab ref={this.getTabRef(tabKey)}
+                           key={tabKey}
+                           tabKey={tabKey}
+                           title={title}
+                           className={className}
                            showCloseButton={showCloseButton}
-                           selected={tabInfo.key === selectedKey}
+                           selected={tabKey === activeKey}
                            onDown={this.onTabDown}
                            onClose={this.onTabClose}
-                           opacity={selectedKey === tabInfo.key && drag ? 0 : 1}
+                           onDidMount={this.onTabDidMount}
+                           opacity={activeKey === tabKey && drag ? 0 : 1}
             />;
         }
         return list;
@@ -189,8 +211,8 @@ export default class TabNav extends Component {
             return;
         }
 
-        const {onChange, selectedKey} = this.props;
-        if(key !== selectedKey || onChange){
+        const {onChange, activeKey} = this.props;
+        if(key !== activeKey && onChange){
             onChange.call(this, key);
         }
 
@@ -206,7 +228,6 @@ export default class TabNav extends Component {
         document.addEventListener('mousemove', this.onMouseMoveHandler);
         this.lastX = position.globalX;
         this.setState({
-            ...this.state,
             drag : true
         });
     }
@@ -214,35 +235,48 @@ export default class TabNav extends Component {
     onMouseMoveHandler(e) {
         const dx = e.pageX - this.lastX;
 
-        const tabInfoList = this.state.tabInfoList.concat();
-        const {selectedKey} = this.props;
-        const downTab = this.getTab(selectedKey);
-        downTab.rect.x += dx;
-        tabInfoList.sort((tabA, tabB)=>{return (tabA.rect.x < tabB.rect.x) ? -1 : 1});
+        const {activeKey, panes} = this.props;
+        const newPanes = panes.concat();
+        this.tabSizeMap.get(activeKey).x += dx;
+        this.setState({
+            drag : true
+        });
+        this.lastX = e.pageX;
+
+        newPanes.sort((paneA, paneB)=>{
+            const keyA = paneA.props.tabKey;
+            const keyB = paneB.props.tabKey;
+            const rectA = this.tabSizeMap.get(keyA);
+            const rectB = this.tabSizeMap.get(keyB);
+            if(rectA && rectB){
+                return rectA.x<rectB.x?-1:1;
+            }
+            else if(rectA && !rectB){
+                return -1;
+            }
+            else if(rectB && !rectA){
+                return 1;
+            }
+            else{
+                return 0;
+            }
+        });
 
         //对比是否发生变化
-        for (let i = 0; i < tabInfoList.length; i++) {
-            if(tabInfoList[i].key !== this.state.tabInfoList[i].key){
-                this.needUpdateRect = true;
+        let isSort = false;
+        for (let i = 0; i < panes.length; i++) {
+            const orgKey = panes[i].props.tabKey;
+            const newKey = newPanes[i].props.tabKey;
+            // console.log(orgKey, newKey)
+            if(orgKey !== newKey){
+                isSort = true;
+                const {onSort} = this.props;
+                if(onSort){
+                    onSort.call(this, newPanes);
+                }
                 break;
             }
         }
-
-        if(this.needUpdateRect){
-            this.setState({
-                ...this.state,
-                drag : true,
-                tabInfoList : tabInfoList
-            });
-        }
-        else{
-            this.setState({
-                ...this.state,
-                drag : true
-            });
-        }
-
-        this.lastX = e.pageX;
     }
 
     onMouseUpHandler() {
@@ -250,90 +284,61 @@ export default class TabNav extends Component {
         document.removeEventListener('mousemove', this.onMouseMoveHandler);
         document.removeEventListener('mouseup', this.onMouseUpHandler);
 
-        this.needUpdateRect = true;
+        this.needSynRect = true;
         this.setState({
-            ...this.state,
             drag : false
         });
     }
 
     onTabClose(key) {
-        let {tabInfoList} = this.state;
-        let {selectedKey} = this.props;
-        for (let i = tabInfoList.length-1; i >= 0; i--) {
-            const tab = tabInfoList[i];
-            if(tab.key === key){
-                tabInfoList.splice(i, 1);
-                if(tab.key === selectedKey){
-                    if(tabInfoList[i-1]){
-                        selectedKey = tabInfoList[i-1].key;
-                    }
-                    else if(tabInfoList[i]){
-                        selectedKey = tabInfoList[i].key;
-                    }
-                    else{
-                        selectedKey = "";
-                    }
-                }
-                break;
-            }
-        }
         const {onClose} = this.props;
-        onClose.call(this, selectedKey, tabInfoList);
-    }
-
-    onMoreTabDidMount(key, rect) {
-        this.moreTabRect = rect;
-    }
-
-    /**
-     * div 大小改变
-     */
-    onResize() {
-        this.rect = ReactDOM.findDOMNode(this).getBoundingClientRect();
-        const divRect = this.rect;
-        // 检查 tabs 的宽度是否大于 width
-        const {tabInfoList} = this.state;
-        const hideKeys = [];
-        for (let i = 0; i < tabInfoList.length; i++) {
-            let {key, rect:tabRect} = tabInfoList[i];
-            let right = 0;
-            if(this.state.hideKeys.length>0){
-                right = divRect.right - this.moreTabRect.width;
-            }else{
-                right = divRect.right;
-            }
-            if(tabRect.right > right){
-                hideKeys.push(key);
-            }
-        }
-        this.setState({
-            ...this.state,
-            hideKeys: hideKeys
-        })
-    }
-
-    /**
-     *
-     * @param key
-     * @returns {TabInfo}
-     */
-    getTab(key){
-        const {tabInfoList} = this.state;
-        for (let i = 0; i < tabInfoList.length; i++) {
-            if(key === tabInfoList[i].key){
-                return tabInfoList[i];
-            }
-        }
-        return null;
-    }
-
-    removeTab(key){
-        const {tabInfoList} = this.state;
-        for (let i = 0; i < tabInfoList.length; i++) {
-            if(key === tabInfoList[i].key){
-                tabInfoList.splice(i,1);
-            }
+        if(onClose){
+            onClose.call(this, key);
         }
     }
+
+    onTabDidMount(key, rect) {
+        this.tabSizeMap.set(key, rect);
+    }
+
+    getTabRef(key) {
+        let ref = this.tabRefMap.get(key);
+        if(!ref){
+            ref = React.createRef();
+            this.tabRefMap.set(key, ref);
+        }
+        return ref;
+    }
+
+    getTabRect(key) {
+        const ref = this.getTabRef(key);
+        return ref.current.getBoundingClientRect();
+    }
+
+    // /**
+    //  * div 大小改变
+    //  */
+    // onResize() {
+    //     this.rect = ReactDOM.findDOMNode(this).getBoundingClientRect();
+    //     const divRect = this.rect;
+    //     // 检查 panes 的宽度是否大于 width
+    //     const {tabInfoList} = this.state;
+    //     const hideKeys = [];
+    //     for (let i = 0; i < tabInfoList.length; i++) {
+    //         let {key, rect:tabRect} = tabInfoList[i];
+    //         let right = 0;
+    //         if(this.state.hideKeys.length>0){
+    //             right = divRect.right - this.moreTabRect.width;
+    //         }else{
+    //             right = divRect.right;
+    //         }
+    //         if(tabRect.right > right){
+    //             hideKeys.push(key);
+    //         }
+    //     }
+    //     this.setState({
+    //         ...this.state,
+    //         hideKeys: hideKeys
+    //     })
+    // }
 }

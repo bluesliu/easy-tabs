@@ -7,15 +7,16 @@ import CloseButton from "./CloseButton";
 
 class Tab extends Component{
     static propTypes = {
+        tabKey : PropTypes.string,
         className : PropTypes.string,
         style : PropTypes.object,
+        title : PropTypes.string,
         onClose : PropTypes.func,
         onDown : PropTypes.func,
         onDidMount : PropTypes.func,
         opacity : PropTypes.number,
         selected : PropTypes.bool,
-        showCloseButton : PropTypes.bool,
-        info : PropTypes.any
+        showCloseButton : PropTypes.bool
     };
 
     static defaultProps = {
@@ -31,7 +32,7 @@ class Tab extends Component{
     }
 
     render() {
-        const {className, opacity, info, selected} = this.props;
+        const {className, opacity, selected, title} = this.props;
         const classNames = classname("easy-tabs-tab",
             {"easy-tabs-tab-sel": selected},
             {"easy-tabs-tab-unSel": !selected},
@@ -45,26 +46,17 @@ class Tab extends Component{
                  onClick={this.onClickHandler}
                  onMouseDown={this.onDownHandler}
                  style={style}>
-                {info.title}
+                {title}
                 {this.renderClose()}
             </div>
         )
     }
 
     componentDidMount() {
-        this.updateRect();
-        this.props.info.addEventListener('updateRect', ()=>{
-            this.updateRect();
-        }, this);
-    }
-
-    componentWillUnmount() {
-        this.props.info.removeAll();
-    }
-
-    updateRect() {
-        const ele = ReactDOM.findDOMNode(this);
-        this.props.info.rect = ele.getBoundingClientRect();
+        const {onDidMount, tabKey} = this.props;
+        if(onDidMount){
+            onDidMount.call(this, tabKey, ReactDOM.findDOMNode(this).getBoundingClientRect());
+        }
     }
 
     renderClose() {
@@ -78,7 +70,7 @@ class Tab extends Component{
     onCloseHandler() {
         const {onClose} = this.props;
         if(onClose){
-            onClose.call(this, this.dataKey);
+            onClose.call(this, this.props.tabKey);
         }
     }
 
@@ -86,12 +78,8 @@ class Tab extends Component{
         const position = this.getMousePosition(e);
         const {onDown} = this.props;
         if(onDown){
-            onDown.call(this, this.dataKey, position);
+            onDown.call(this, this.props.tabKey, position);
         }
-    }
-
-    get dataKey() {
-        return this.props.info.key;
     }
 
     getMousePosition(e) {

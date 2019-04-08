@@ -36,6 +36,7 @@ export default class MoreTab extends Component {
         const {className} = this.props;
         const classNames = classname("easy-tabs-tab",
             {"easy-tabs-tab-unSel": true},
+            {[className+'tab']: true},
             {[className+'tab-unSel']: true});
         return (
             <div className={classNames}
