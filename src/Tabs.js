@@ -76,7 +76,7 @@ export default class Tabs extends Component {
                         onClose={this.onTabClose}
                         onSort={this.onTabSort}
                         panes={panes}/>
-                <TabContent>
+                <TabContent className={className}>
                     {panes.filter((pane)=>{return pane.props.tabKey===activeKey}, this)[0].props.children}
                 </TabContent>
             </div>

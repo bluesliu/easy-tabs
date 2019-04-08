@@ -126,9 +126,8 @@ export default class TabNav extends Component {
 
     render() {
         const {className} = this.props;
-        const classNames = classname("easy-tabs-tabNav",
-            {[`${className}-tabNav`]: className!==undefined});
-
+        const classNames = classname("easy-tabs","tabNav",
+            {[`${className}`]: className!==undefined});
         return (
            <div className={classNames}>
                {this.renderTabs()}

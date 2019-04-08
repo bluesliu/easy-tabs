@@ -1,4 +1,12 @@
 .easy-tabs {
+    --borderColor: #383838;
+    --bgColor: #535353;
+    --bgColor-unSel: #424242;
+    --bgColor-unSel-hover: #4d4d4d;
+    --tabColor: #ffffff;
+    --tabColor-unSel: #aaaaaa;
+    --contentColor: #ffffff;
+
     margin: 0;
     padding: 0;
 
@@ -15,7 +23,7 @@
     box-sizing: border-box;
 }
 
-.easy-tabs-tabNav {
+.easy-tabs .tabNav {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -23,7 +31,7 @@
     z-index: 100;
 }
 
-.easy-tabs-tab {
+.easy-tabs .tab {
     padding: 0 8px;
     margin-right: -1px;
 
@@ -39,7 +47,7 @@
     -webkit-user-select: none;
 
     font-size: 12px;
-    border-color: #383838;
+    border-color: var(--borderColor);
     border-style: solid;
     border-width: 1px;
 
@@ -47,34 +55,34 @@
 }
 
 /*未选择-常态*/
-.easy-tabs-tab-unSel {
-    background-color: #424242;
-    color: #aaaaaa;
+.easy-tabs .tab-unSel {
+    background-color: var(--bgColor-unSel);
+    color: var(--tabColor-unSel);
 }
 /*未选择-鼠标经过*/
-.easy-tabs-tab-unSel:hover {
-    background-color: #4d4d4d;
+.easy-tabs .tab-unSel:hover {
+    background-color: var(--bgColor-unSel-hover);
 }
 /*未选择-鼠标按下*/
-.easy-tabs-tab-unSel:active {
+.easy-tabs .tab-unSel:active {
     background-color: #383838;
 }
 /*选择-常态*/
-.easy-tabs-tab-sel {
-    background-color: #535353;
-    color: white;
-    border-bottom-color: #535353;
+.easy-tabs .tab-sel {
+    background-color: var(--bgColor);
+    color: var(--tabColor);
+    border-bottom-color: var(--bgColor);
 }
 /*选择-鼠标经过*/
-.easy-tabs-tab-sel:hover {
-    background-color: #535353;
+.easy-tabs .tab-sel:hover {
+    background-color: var(--bgColor);
 }
 /*选择-鼠标按下*/
-.easy-tabs-tab-sel:active {
-    background-color: #535353;
+.easy-tabs .tab-sel:active {
+    background-color: var(--bgColor);
 }
 
-.easy-tabs-closeBtn {
+.easy-tabs .closeBtn {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -99,22 +107,23 @@
     transition-property: all;
 }
 
-.easy-tabs-closeBtn:hover {
+.easy-tabs .closeBtn:hover {
     border-color: rgba(99,99,99,1);
 }
 
-.easy-tabs-closeBtn:active {
+.easy-tabs .closeBtn:active {
     background-color: rgba(56,56,56,1);
 }
 
-.easy-tabs-content {
+.easy-tabs .content {
+    overflow: auto;
     background-color: #535353;
     font-size: 12px;
-    color: white;
+    color: var(--contentColor);
     padding: 8px;
     margin-top: -1px;
 
-    border-color: #383838;
+    border-color: var(--borderColor);
     border-style: solid;
     border-width: 1px;
 }

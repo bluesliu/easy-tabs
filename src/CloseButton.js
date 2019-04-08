@@ -24,7 +24,7 @@ export default class CloseButton extends Component {
 
         return (
             <i
-                className={classname("easy-tabs-closeBtn", {[className+"-closeBtn"]:true})}
+                className={classname("easy-tabs","closeBtn", {[className]:className!==null})}
                 aria-label="图标：close" tabIndex="-1"
                 onClick={this.onClickHandler}
                 onMouseDown={(e)=>{e.stopPropagation(); e.preventDefault()}}>

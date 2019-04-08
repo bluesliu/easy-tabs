@@ -1,0 +1,18 @@
+.my-easy-tabs {
+    --borderColor: #ff0000;
+    --bgColor: #535353;
+    --bgColor-unSel: #424242;
+    --bgColor-unSel-hover: #4d4d4d;
+    --tabColor: #00ff00;
+    --tabColor-unSel: #aaaaaa;
+    --contentColor: #ffff00;
+}
+
+.my-easy-tabs .tabNav{
+    height: 30px;
+}
+
+
+.my-easy-tabs .content {
+    height: 100px;
+}

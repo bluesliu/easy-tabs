@@ -23,10 +23,8 @@ export default class MoreTab extends Component {
 
     render() {
         const {className} = this.props;
-        const classNames = classname("easy-tabs-tab",
-            {"easy-tabs-tab-unSel": true},
-            {[className+'tab']: true},
-            {[className+'tab-unSel']: true});
+        const classNames = classname("easy-tabs","tab","tab-unSel",
+            {[className]: className!==undefined});
         return (
             <div className={classNames}
                  onClick={this.onClickHandler}>

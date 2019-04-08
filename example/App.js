@@ -1,5 +1,6 @@
 import React, {Component} from "react";
 import Tabs from "../src";
+import "./my-easy-tabs.css";
 
 const TabPane = Tabs.TabPane;
 const TabsHelper = Tabs.TabsHelper;
@@ -9,7 +10,7 @@ export default class App extends Component {
     state = {
         activeKey : "1",
         panes : [
-            {key:"1", title: "title 1", content: <div>content 1<br/>kjsldkjfskjdfl</div>},
+            {key:"1", title: "title 1", content: <div>content 1<br/>content 1<br/>content 1<br/>content 1<br/>content 1<br/>content 1</div>},
             {key:"2", title: "title 2", content: <div>content 2</div>},
             {key:"3", title: "title 3", content: <div>content 3</div>},
             {key:"4", title: "title 4", content: <div>content 4</div>},
@@ -56,7 +57,7 @@ export default class App extends Component {
     }
 
     onTabsSort(panes) {
-        console.log(panes)
+        console.log('onTabsSort')
         this.setState({panes:panes})
     }
 

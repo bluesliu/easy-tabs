@@ -18,8 +18,7 @@ export default class TabContent extends Component {
 
     render() {
         const {className, children} = this.props;
-        console.log(children)
-        const classNames = classnames("easy-tabs-content",{[`${className}-content`]:className!==undefined});
+        const classNames = classnames("easy-tabs","content",{[className]:className!==undefined});
         return (
             <div className={classNames}>
                 {children}

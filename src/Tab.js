@@ -33,12 +33,10 @@ class Tab extends Component{
 
     render() {
         const {className, opacity, selected, title} = this.props;
-        const classNames = classname("easy-tabs-tab",
-            {"easy-tabs-tab-sel": selected},
-            {"easy-tabs-tab-unSel": !selected},
-            {[className + '-tab']: className!==undefined},
-            {[className + 'tab-sel']: selected && className!==undefined},
-            {[className + 'tab-unSel']: !selected && className!==undefined});
+        const classNames = classname("easy-tabs","tab",
+            {"tab-sel": selected},
+            {"tab-unSel": !selected},
+            {[className]: className!==undefined});
         const style = {...this.props.style, opacity: opacity};
 
         return (
