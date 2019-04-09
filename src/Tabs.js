@@ -3,6 +3,7 @@ import classname from "classnames";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import ResizeObserver from "resize-observer-polyfill"
+import Menu from "easy-context-menu";
 
 import "./easy-tabs.css";
 import TabPane from "./TabPane";
@@ -31,6 +32,7 @@ export default class Tabs extends Component {
         this.onTabClose = this.onTabClose.bind(this);
         this.onTabAdd = this.onTabAdd.bind(this);
         this.onTabSort = this.onTabSort.bind(this);
+        this.onMoreTab = this.onMoreTab.bind(this);
     }
 
     componentDidMount() {
@@ -75,6 +77,7 @@ export default class Tabs extends Component {
                         onChange={this.onTabChange}
                         onClose={this.onTabClose}
                         onSort={this.onTabSort}
+                        onMoreTab={this.onMoreTab}
                         panes={panes}/>
                 <TabContent className={className}>
                     {panes.filter((pane)=>{return pane.props.tabKey===activeKey}, this)[0].props.children}
@@ -109,5 +112,27 @@ export default class Tabs extends Component {
         if(onSort){
             onSort.call(this, panes);
         }
+    }
+
+    onMoreTab(hideTabs, rect) {
+        const menu = (
+            <Menu>
+                {this.getMenuItems(hideTabs)}
+            </Menu>
+        );
+        Menu.Popup(menu, rect.x, rect.bottom);
+    }
+
+    getMenuItems(hideTabs) {
+        const list = [];
+        for (let i = 0; i < hideTabs.length; i++) {
+            const {key, title} = hideTabs[i];
+            list.push(
+                <Menu.Item key={key}>
+                    {title}
+                </Menu.Item>
+            )
+        }
+        return list;
     }
 }

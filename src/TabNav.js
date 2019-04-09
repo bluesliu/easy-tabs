@@ -18,7 +18,8 @@ export default class TabNav extends Component {
         panes : PropTypes.array,
         onChange : PropTypes.func,
         onClose : PropTypes.func,
-        onSort : PropTypes.func
+        onSort : PropTypes.func,
+        onMoreTab : PropTypes.func
     };
 
     static defaultProps = {
@@ -67,6 +68,15 @@ export default class TabNav extends Component {
             this.isFirst = false;
             this.updateRect();
             this.updateHideKeys();
+        }
+        else{
+            // 更新 more tab 的位置
+            const ref = this.getTabRef(MoreTab.KEY);
+            if(!ref || !ref.current){
+                return;
+            }
+            const rect = ReactDOM.findDOMNode(ref.current).getBoundingClientRect();
+            this.tabSizeMap.set(MoreTab.KEY, rect);
         }
     }
 
@@ -207,6 +217,18 @@ export default class TabNav extends Component {
     onTabDown(key, position) {
         // 点击了扩展tab
         if(key === MoreTab.KEY){
+            const {onMoreTab, panes} = this.props;
+            const {hideKeys} = this.state;
+            if(onMoreTab){
+                const hideList = [];
+                for (let i = 0; i < panes.length; i++) {
+                    const {tabKey, title} = panes[i].props;
+                    if(hideKeys.indexOf(tabKey) !== -1){
+                        hideList.push({title:title, key:tabKey});
+                    }
+                }
+                onMoreTab.call(this, hideList, this.tabSizeMap.get(key));
+            }
             return;
         }
 
