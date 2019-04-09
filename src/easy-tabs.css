@@ -45,6 +45,7 @@
     -moz-user-select: none;
     -ms-user-select: none;
     -webkit-user-select: none;
+    cursor: default;
 
     font-size: 12px;
     border-color: var(--borderColor);
