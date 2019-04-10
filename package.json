@@ -7,6 +7,7 @@
   "scripts": {
     "start": "webpack-dev-server",
     "build": "webpack --config webpack.build.js",
+    "build example": "webpack --config webpack.build.example.js",
     "pub": "npm publish"
   },
   "repository": {
@@ -36,7 +37,7 @@
     "webpack": "^4.29.5",
     "webpack-cli": "^3.2.3",
     "webpack-dev-server": "^3.2.1",
-    "easy-context-menu": "^0.1.1"
+    "easy-context-menu": "^0.1.4"
   },
   "peerDependencies": {},
   "dependencies": {

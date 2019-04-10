@@ -3,14 +3,16 @@
  */
 import React, {Component} from "react";
 import PropTypes from "prop-types";
-import classname from "classnames";
+import classNames from "classnames";
+
+import arrowImg from "./arrow_line_2.svg";
+import closeImg from "./close.svg";
 
 export default class MoreTab extends Component {
 
     static KEY = Symbol('MoreTab');
 
     static propTypes = {
-        className : PropTypes.string,
         onClick : PropTypes.func,
     };
 
@@ -22,13 +24,11 @@ export default class MoreTab extends Component {
     }
 
     render() {
-        const {className} = this.props;
-        const classNames = classname("easy-tabs","tab","tab-unSel",
-            {[className]: className!==undefined});
+        const names = classNames("easy-tabs-tab","easy-tabs-tab-unSel","easy-tabs-moreTab");
         return (
-            <div className={classNames}
+            <div className={names}
                  onClick={this.onClickHandler}>
-                {">>"}
+                <img src={arrowImg} alt=""/>
             </div>
         )
     }

@@ -8,11 +8,9 @@ import PropTypes from "prop-types";
 import Tab from "./Tab";
 import MoreTab from "./MoreTab";
 import TimerHelper from "./TimerHelper";
-import classname from "classnames";
 
 export default class TabNav extends Component {
     static propTypes = {
-        className : PropTypes.string,
         showCloseButton: PropTypes.bool,
         activeKey : PropTypes.string,
         panes : PropTypes.array,
@@ -135,11 +133,8 @@ export default class TabNav extends Component {
     }
 
     render() {
-        const {className} = this.props;
-        const classNames = classname("easy-tabs","tabNav",
-            {[`${className}`]: className!==undefined});
         return (
-           <div className={classNames}>
+           <div className="easy-tabs-tabNav">
                {this.renderTabs()}
                {this.renderMoreTab()}
                {this.renderFloatTab()}
@@ -148,7 +143,7 @@ export default class TabNav extends Component {
     }
 
     renderFloatTab() {
-        const {activeKey, showCloseButton, panes, className} = this.props;
+        const {activeKey, showCloseButton, panes} = this.props;
         const {drag} = this.state;
         if(!drag){
             return;
@@ -175,22 +170,20 @@ export default class TabNav extends Component {
         style.left = Math.max(paneRect.x, this.rect.x);
         style.left = Math.min(style.left, this.rect.width-paneRect.width+this.rect.x);
         style.cursor = 'grabbing';
-        return <Tab className={className} style={style} title={paneTitle} selected={true} showCloseButton={showCloseButton}/>
+        return <Tab style={style} title={paneTitle} selected={true} showCloseButton={showCloseButton}/>
     }
 
     renderMoreTab() {
-        const {className} = this.props;
         const {hideKeys} = this.state;
         if (!this.tabSizeMap.get(MoreTab.KEY) || hideKeys.length > 0) {
             return <MoreTab ref={this.getTabRef(MoreTab.KEY)}
-                            className={className}
                             onClick={this.onTabDown}/>
         }
         return null;
     }
 
     renderTabs() {
-        const {activeKey, showCloseButton, panes, className} = this.props;
+        const {activeKey, showCloseButton, panes} = this.props;
         const {hideKeys, drag} = this.state;
 
         const list = [];
@@ -203,7 +196,6 @@ export default class TabNav extends Component {
                            key={tabKey}
                            tabKey={tabKey}
                            title={title}
-                           className={className}
                            showCloseButton={showCloseButton}
                            selected={tabKey === activeKey}
                            onDown={this.onTabDown}

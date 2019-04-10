@@ -6,13 +6,15 @@
     /*--tabColor: #00ff00;*/
     /*--tabColor-unSel: #aaaaaa;*/
     /*--contentColor: #ffff00;*/
+    width: 300px;
+    height: 300px;
 }
 
-.my-easy-tabs .tabNav{
-    height: 30px;
-}
+/*.my-easy-tabs .tabNav{*/
+/*    height: 30px;*/
+/*}*/
 
 
-.my-easy-tabs .content {
-    height: 100px;
-}
+/*.my-easy-tabs .content {*/
+/*    height: 100px;*/
+/*}*/

@@ -1,5 +1,5 @@
 import React,{Component} from "react";
-import classname from "classnames";
+import classNames from "classnames";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import ResizeObserver from "resize-observer-polyfill"
@@ -12,7 +12,7 @@ import TabContent from "./TabContent";
 
 export default class Tabs extends Component {
     static propTypes = {
-        className : PropTypes.string,
+        customStyle : PropTypes.string,
         activeKey : PropTypes.string,
         editable : PropTypes.bool,
         onChange : PropTypes.func,
@@ -33,6 +33,7 @@ export default class Tabs extends Component {
         this.onTabAdd = this.onTabAdd.bind(this);
         this.onTabSort = this.onTabSort.bind(this);
         this.onMoreTab = this.onMoreTab.bind(this);
+        this.onClickMenu = this.onClickMenu.bind(this);
     }
 
     componentDidMount() {
@@ -47,7 +48,7 @@ export default class Tabs extends Component {
     }
 
     render() {
-        const {className, activeKey, editable} = this.props;
+        const {customStyle, activeKey, editable} = this.props;
         let panes = React.Children.map(this.props.children, (element, index) => {
             if (!element) {
                 return null;
@@ -60,30 +61,38 @@ export default class Tabs extends Component {
 
             const {key} = element;
             const newProps = {
-                tabKey: key,
-                className: className
+                tabKey: key
             };
             const mergeProps = Object.assign({}, element.props, newProps);
             return React.cloneElement(element, mergeProps);
         });
 
-        const classNames = classname("easy-tabs",
-            {[className]: className !== undefined});
+        const names = classNames("easy-tabs",
+            "easy-tabs-tabs",
+            {[customStyle]: customStyle !== undefined});
         return (
-            <div className={classNames}>
-                <TabNav className={className}
-                        activeKey={activeKey}
+            <div className={names}>
+                <TabNav activeKey={activeKey}
                         showCloseButton={editable}
                         onChange={this.onTabChange}
                         onClose={this.onTabClose}
                         onSort={this.onTabSort}
                         onMoreTab={this.onMoreTab}
                         panes={panes}/>
-                <TabContent className={className}>
-                    {panes.filter((pane)=>{return pane.props.tabKey===activeKey}, this)[0].props.children}
+                <TabContent>
+                    {this.renderContent(panes)}
                 </TabContent>
             </div>
         )
+    }
+
+    renderContent(panes) {
+        const {activeKey} = this.props;
+        const contents = panes.filter((pane)=>{return pane.props.tabKey===activeKey}, this);
+        if(!contents[0] || !contents[0].props){
+            return null;
+        }
+        return contents[0].props.children;
     }
 
     onTabChange(key) {
@@ -116,11 +125,19 @@ export default class Tabs extends Component {
 
     onMoreTab(hideTabs, rect) {
         const menu = (
-            <Menu>
+            <Menu onClick={this.onClickMenu}>
                 {this.getMenuItems(hideTabs)}
             </Menu>
         );
         Menu.Popup(menu, rect.x, rect.bottom);
+    }
+
+    onClickMenu(key) {
+        const {onChange} = this.props;
+        console.log(this)
+        if(onChange){
+            onChange.call(this, key);
+        }
     }
 
     getMenuItems(hideTabs) {

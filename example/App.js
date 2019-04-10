@@ -11,7 +11,7 @@ export default class App extends Component {
         activeKey : "1",
         panes : [
             {key:"1", title: "title 1", content: <div>content 1<br/>content 1<br/>content 1<br/>content 1<br/>content 1<br/>content 1</div>},
-            {key:"2", title: "title 2", content: <div>content 2</div>},
+            {key:"2", title: "Title 2", content: <div>content 2</div>},
             {key:"3", title: "title 3", content: <div>content 3</div>},
             {key:"4", title: "title 4", content: <div>content 4</div>},
             ]
@@ -31,14 +31,11 @@ export default class App extends Component {
                 <button onClick={this.addTab}>添加tab</button>
                 <br/>
                 <br/>
-                <br/>
-                <br/>
-                <br/>
                 <Tabs activeKey={this.state.activeKey}
                       onChange={this.onTabsChange}
                       onClose={this.onTabsClose}
                       onSort={this.onTabsSort}
-                      className="my-easy-tabs">
+                      customStyle="my-easy-tabs">
                     {this.renderTabs()}
                 </Tabs>
             </div>
@@ -63,10 +60,18 @@ export default class App extends Component {
 
     addTab() {
         console.log('addTab')
-        const tabs = this.state.panes;
-        const idx = tabs.length + 1;
-        tabs.push({title:"title "+idx, key:idx.toString(), content:<div>{"content "+idx}</div>});
-        this.setState({panes:tabs});
+        const tabs = this.state.panes.concat();
+        tabs.sort((tabA, tabB)=>{return tabA.key<tabB.key?1:-1});
+        const maxTab = tabs[0];
+        let tabKey;
+        if(maxTab){
+            tabKey = parseInt(maxTab.key) + 1;
+        }else{
+            tabKey = 1;
+        }
+        console.log(tabKey)
+        this.state.panes.push({title:"title "+tabKey, key:tabKey.toString(), content:<div>{"content "+tabKey}</div>});
+        this.setState({panes: this.state.panes});
     }
 
 

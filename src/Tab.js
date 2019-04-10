@@ -1,14 +1,13 @@
 import React, {Component} from "react";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
-import classname from "classnames";
+import classNames from "classnames";
 
 import CloseButton from "./CloseButton";
 
 class Tab extends Component{
     static propTypes = {
         tabKey : PropTypes.string,
-        className : PropTypes.string,
         style : PropTypes.object,
         title : PropTypes.string,
         onClose : PropTypes.func,
@@ -32,19 +31,18 @@ class Tab extends Component{
     }
 
     render() {
-        const {className, opacity, selected, title} = this.props;
-        const classNames = classname("easy-tabs","tab",
-            {"tab-sel": selected},
-            {"tab-unSel": !selected},
-            {[className]: className!==undefined});
+        const {opacity, selected, title} = this.props;
+        const names = classNames("easy-tabs-tab",
+            {"easy-tabs-tab-sel": selected},
+            {"easy-tabs-tab-unSel": !selected});
         const style = {...this.props.style, opacity: opacity};
 
         return (
-            <div className={classNames}
+            <div className={names}
                  onClick={this.onClickHandler}
                  onMouseDown={this.onDownHandler}
                  style={style}>
-                {title}
+                {this.renderTitle()}
                 {this.renderClose()}
             </div>
         )
@@ -55,6 +53,13 @@ class Tab extends Component{
         if(onDidMount){
             onDidMount.call(this, tabKey, ReactDOM.findDOMNode(this).getBoundingClientRect());
         }
+    }
+
+    renderTitle() {
+        const {title} = this.props;
+        return (
+            <span className="easy-tabs-title">{title}</span>
+        )
     }
 
     renderClose() {
