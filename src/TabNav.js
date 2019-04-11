@@ -16,7 +16,7 @@ export default class TabNav extends Component {
         panes : PropTypes.array,
         onChange : PropTypes.func,
         onClose : PropTypes.func,
-        onSort : PropTypes.func,
+        onSequenceChange : PropTypes.func,
         onMoreTab : PropTypes.func
     };
 
@@ -225,7 +225,7 @@ export default class TabNav extends Component {
                         hideList.push({title:title, key:tabKey});
                     }
                 }
-                onMoreTab.call(this, hideList, this.tabSizeMap.get(key));
+                onMoreTab.call(this, hideList, this.tabSizeMap);
             }
             return;
         }
@@ -282,24 +282,27 @@ export default class TabNav extends Component {
         });
 
         //对比是否发生变化
-        let isSort = false;
+        let oldIdx = -1;
+        let newIdx = -1;
         for (let i = 0; i < panes.length; i++) {
             const orgKey = panes[i].props.tabKey;
             const newKey = newPanes[i].props.tabKey;
             if(orgKey !== newKey){
-                isSort = true;
+                oldIdx = this.getTabIndex(panes, this.props.activeKey);
+                newIdx = this.getTabIndex(newPanes, this.props.activeKey);
                 break;
             }
         }
-        if(isSort){
-            const {onSort} = this.props;
-            if(onSort){
-                const list = [];
-                for (let j = 0; j < newPanes.length; j++) {
-                    const {tabKey, title, children} = newPanes[j].props;
-                    list[j] = {key:tabKey, title:title, content:children};
-                }
-                onSort.call(this, list);
+        if(oldIdx !== -1 && newIdx !== -1){
+            const {onSequenceChange} = this.props;
+            if(onSequenceChange){
+                // const list = [];
+                // for (let j = 0; j < newPanes.length; j++) {
+                //     const {tabKey, title, children} = newPanes[j].props;
+                //     list[j] = {key:tabKey, title:title, content:children};
+                // }
+                // onSequenceChange.call(this, list);
+                onSequenceChange.call(this, oldIdx, newIdx);
             }
         }
     }
@@ -329,5 +332,14 @@ export default class TabNav extends Component {
             this.tabRefMap.set(key, ref);
         }
         return ref;
+    }
+
+    getTabIndex(panes, key){
+        for (let i = 0; i < panes.length; i++) {
+            if(panes[i].props.tabKey === key){
+                return i;
+            }
+        }
+        return -1;
     }
 }

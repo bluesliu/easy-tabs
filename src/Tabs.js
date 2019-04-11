@@ -9,6 +9,7 @@ import "./easy-tabs.css";
 import TabPane from "./TabPane";
 import TabNav from "./TabNav";
 import TabContent from "./TabContent";
+import MoreTab from "./MoreTab";
 
 export default class Tabs extends Component {
     static propTypes = {
@@ -18,7 +19,7 @@ export default class Tabs extends Component {
         onChange : PropTypes.func,
         onClose : PropTypes.func,
         onAdd : PropTypes.func,
-        onSort : PropTypes.func
+        onSequenceChange : PropTypes.func
     };
 
     static defaultProps = {
@@ -28,10 +29,23 @@ export default class Tabs extends Component {
 
     constructor(props) {
         super(props);
+
+        this.panes = [];
+        /**
+         * 由 TabNav 的 onMoreTab 传过来
+         * @type {Map}
+         */
+        this.tabRectMap = null;
+        /**
+         * 由 TabNav 的 onMoreTab 传过来
+         * @type {Array}
+         */
+        this.hideKeys = null;
+
         this.onTabChange = this.onTabChange.bind(this);
         this.onTabClose = this.onTabClose.bind(this);
         this.onTabAdd = this.onTabAdd.bind(this);
-        this.onTabSort = this.onTabSort.bind(this);
+        this.onTabSequenceChange = this.onTabSequenceChange.bind(this);
         this.onMoreTab = this.onMoreTab.bind(this);
         this.onClickMenu = this.onClickMenu.bind(this);
     }
@@ -49,7 +63,8 @@ export default class Tabs extends Component {
 
     render() {
         const {customStyle, activeKey, editable} = this.props;
-        let panes = React.Children.map(this.props.children, (element, index) => {
+        this.panes.length = 0;
+        const list = React.Children.map(this.props.children, (element, index) => {
             if (!element) {
                 return null;
             }
@@ -64,6 +79,8 @@ export default class Tabs extends Component {
                 tabKey: key
             };
             const mergeProps = Object.assign({}, element.props, newProps);
+            this.panes.push({key:key, tabKey:key, title:mergeProps.title, content:mergeProps.children});
+
             return React.cloneElement(element, mergeProps);
         });
 
@@ -76,23 +93,23 @@ export default class Tabs extends Component {
                         showCloseButton={editable}
                         onChange={this.onTabChange}
                         onClose={this.onTabClose}
-                        onSort={this.onTabSort}
+                        onSequenceChange={this.onTabSequenceChange}
                         onMoreTab={this.onMoreTab}
-                        panes={panes}/>
+                        panes={list}/>
                 <TabContent>
-                    {this.renderContent(panes)}
+                    {this.renderContent()}
                 </TabContent>
             </div>
         )
     }
 
-    renderContent(panes) {
+    renderContent() {
         const {activeKey} = this.props;
-        const contents = panes.filter((pane)=>{return pane.props.tabKey===activeKey}, this);
-        if(!contents[0] || !contents[0].props){
+        const contents = this.panes.filter((pane)=>{return pane.key===activeKey}, this);
+        if(!contents[0]){
             return null;
         }
-        return contents[0].props.children;
+        return contents[0].content;
     }
 
     onTabChange(key) {
@@ -116,15 +133,18 @@ export default class Tabs extends Component {
         }
     }
 
-    onTabSort(panes) {
-        const {onSort} = this.props;
-        if(onSort){
-            onSort.call(this, panes);
+    onTabSequenceChange(oldIndex, newIndex) {
+        const {onSequenceChange} = this.props;
+        if(onSequenceChange){
+            onSequenceChange.call(this, oldIndex, newIndex);
         }
     }
 
-    onMoreTab(hideTabs, rect) {
+    onMoreTab(hideTabs, rectMap) {
         const {customStyle} = this.props;
+        this.hideKeys = hideTabs;
+        this.tabRectMap = rectMap;
+        const moreRect = rectMap.get(MoreTab.KEY);
         const names = classNames(
             'easy-tabs-menu',
             {[`${customStyle}-menu`]: customStyle !== undefined}
@@ -133,24 +153,46 @@ export default class Tabs extends Component {
         const menu = (
             <Menu className={names}
                   onClick={this.onClickMenu}>
-                {this.getMenuItems(hideTabs)}
+                {this.getMenuItems()}
             </Menu>
         );
-        Menu.Popup(menu, rect.x, rect.bottom);
+        Menu.Popup(menu, moreRect.x, moreRect.bottom);
     }
 
     onClickMenu(key) {
         const {onChange} = this.props;
-        console.log(this)
         if(onChange){
+            const hideRect = this.tabRectMap.get(key);
+            const moreRect = this.tabRectMap.get(MoreTab.KEY);
+            const selfRect = ReactDOM.findDOMNode(this).getBoundingClientRect();
+            let oldIdx = this.getPaneIndex(key);
+            // let selPane = this.panes[oldIdx];
+            let insertIdx = -1;
+            for (let i = 0; i < this.panes.length; i++) {
+                const {key} = this.panes[i];
+                if(this.hideKeys.indexOf(key)===-1){
+                    const tabRect = this.tabRectMap.get(key);
+                    if(selfRect.width - tabRect.x - moreRect.width >= hideRect.width){
+                        insertIdx = i;
+                    }
+                }
+            }
+            if(insertIdx !== -1 && oldIdx !== -1){
+                // this.panes.splice(oldIdx, 1);
+                // this.panes.splice(insertIdx, 0, selPane);
+                if(this.props.onSequenceChange){
+                    this.props.onSequenceChange.call(this, oldIdx, insertIdx);
+                }
+            }
             onChange.call(this, key);
         }
     }
 
-    getMenuItems(hideTabs) {
+    getMenuItems() {
+        const hideKeys = this.hideKeys;
         const list = [];
-        for (let i = 0; i < hideTabs.length; i++) {
-            const {key, title} = hideTabs[i];
+        for (let i = 0; i < hideKeys.length; i++) {
+            const {key, title} = hideKeys[i];
             list.push(
                 <Menu.Item key={key}>
                     {title}
@@ -158,5 +200,15 @@ export default class Tabs extends Component {
             )
         }
         return list;
+    }
+
+    getPaneIndex(key) {
+        const {panes} = this;
+        for (let i = 0; i < panes.length; i++) {
+            if(panes[i].key===key){
+                return i;
+            }
+        }
+        return -1;
     }
 }

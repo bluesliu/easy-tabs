@@ -8,33 +8,31 @@ const TabsHelper = Tabs.TabsHelper;
 export default class App extends Component {
 
     state = {
-        activeKey : "1",
-        panes : [
-            {key:"1", title: "title 1", content: <div>content 1<br/>content 1<br/>content 1<br/>content 1<br/>content 1<br/>content 1</div>},
-            {key:"2", title: "Title 2", content: <div>content 2</div>},
-            {key:"3", title: "title 3", content: <div>content 3</div>},
-            {key:"4", title: "title 4", content: <div>content 4</div>},
-            ]
+        activeKey: "1",
+        panes: [
+            {key: "1", title: "tab 1", content: <div>content 1</div>},
+            {key: "2", title: "tab 2", content: <div>content 2</div>},
+            {key: "3", title: "tab 3", content: <div>content 3</div>},
+            {key: "4", title: "tab 4", content: <div>content 4</div>},
+        ]
     };
 
-    constructor(props){
+    constructor(props) {
         super(props);
         this.addTab = this.addTab.bind(this)
         this.onTabsChange = this.onTabsChange.bind(this);
         this.onTabsClose = this.onTabsClose.bind(this);
-        this.onTabsSort = this.onTabsSort.bind(this);
+        this.onSequenceChange = this.onSequenceChange.bind(this);
     }
 
     render() {
         return (
             <div>
                 <button onClick={this.addTab}>添加tab</button>
-                <br/>
-                <br/>
                 <Tabs activeKey={this.state.activeKey}
                       onChange={this.onTabsChange}
                       onClose={this.onTabsClose}
-                      onSort={this.onTabsSort}
+                      onSequenceChange={this.onSequenceChange}
                       customStyle="my-easy-tabs">
                     {this.renderTabs()}
                 </Tabs>
@@ -42,40 +40,7 @@ export default class App extends Component {
         )
     }
 
-    onTabsChange(activeKey) {
-        console.log('onTabsChange')
-        this.setState({activeKey:activeKey})
-    }
-
-    onTabsClose(closeKey) {
-        console.log('onTabsClose')
-        const newState = TabsHelper.tabClose(this.state, closeKey);
-        this.setState(newState);
-    }
-
-    onTabsSort(panes) {
-        console.log('onTabsSort')
-        this.setState({panes:panes})
-    }
-
-    addTab() {
-        console.log('addTab')
-        const tabs = this.state.panes.concat();
-        tabs.sort((tabA, tabB)=>{return tabA.key<tabB.key?1:-1});
-        const maxTab = tabs[0];
-        let tabKey;
-        if(maxTab){
-            tabKey = parseInt(maxTab.key) + 1;
-        }else{
-            tabKey = 1;
-        }
-        console.log(tabKey)
-        this.state.panes.push({title:"title "+tabKey, key:tabKey.toString(), content:<div>{"content "+tabKey}</div>});
-        this.setState({panes: this.state.panes});
-    }
-
-
-    renderTabs(){
+    renderTabs() {
         const {panes} = this.state;
         const list = [];
         for (let i = 0; i < panes.length; i++) {
@@ -87,6 +52,46 @@ export default class App extends Component {
             )
         }
         return list;
+    }
+
+    onTabsChange(activeKey) {
+        console.log('onTabsChange')
+        this.setState({activeKey: activeKey})
+    }
+
+    onTabsClose(closeKey) {
+        console.log('onTabsClose')
+        const newState = TabsHelper.tabClose(this.state, closeKey);
+        this.setState(newState);
+    }
+
+    onSequenceChange(oldIndex, newIndex) {
+        console.log('onSequenceChange', oldIndex, newIndex)
+        TabsHelper.tabSwitch(this.state.panes, oldIndex, newIndex);
+        this.setState({panes: this.state.panes});
+    }
+
+    addTab() {
+        console.log('addTab', tabKey)
+        const tabs = this.state.panes.concat();
+        tabs.sort((tabA, tabB) => {
+            return tabA.key < tabB.key ? 1 : -1
+        });
+        const maxTab = tabs[0];
+        let tabKey;
+        if (maxTab) {
+            tabKey = parseInt(maxTab.key) + 1;
+        } else {
+            tabKey = 1;
+        }
+        this.state.panes.push({
+            key: tabKey.toString(),
+            title: "tab " + tabKey,
+            content: <div>{"content " + tabKey}</div>
+        });
+        this.setState({
+            panes: this.state.panes
+        });
     }
 }
 

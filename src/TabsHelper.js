@@ -39,4 +39,10 @@ export default class TabsHelper {
             activeKey : newActiveKey
         }
     }
+
+    static tabSwitch(tabs, oldIndex, newIndex){
+        const tab = tabs[oldIndex];
+        tabs.splice(oldIndex, 1);
+        tabs.splice(newIndex, 0, tab);
+    }
 }
