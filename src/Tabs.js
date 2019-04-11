@@ -124,8 +124,15 @@ export default class Tabs extends Component {
     }
 
     onMoreTab(hideTabs, rect) {
+        const {customStyle} = this.props;
+        const names = classNames(
+            'easy-tabs-menu',
+            {[`${customStyle}-menu`]: customStyle !== undefined}
+        );
+
         const menu = (
-            <Menu onClick={this.onClickMenu}>
+            <Menu className={names}
+                  onClick={this.onClickMenu}>
                 {this.getMenuItems(hideTabs)}
             </Menu>
         );

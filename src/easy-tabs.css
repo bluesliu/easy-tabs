@@ -21,6 +21,23 @@
     padding: 0;
 }
 
+.easy-tabs-menu {
+    --minWidth: 100px;
+    --maxWidth: 300px;
+    --borderColor: #383838;
+    --bgColor: #535353;
+    --bgColor-hover: #777777;
+    --titleColor: #ffffff;
+    --titleColor-disabled: #aaaaaa;
+    --dividerColor: #3c3c3c;
+    --arrowColor: #ffffff;
+    --fontSize: 14px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.3);
+
+    --itemHeight: 22px;
+    --itemPadding: 2px 8px;
+}
+
 .easy-tabs-tabs {
     width: var(--width);
     height: var(--height);

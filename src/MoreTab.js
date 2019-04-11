@@ -5,9 +5,6 @@ import React, {Component} from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 
-import arrowImg from "./arrow_line_2.svg";
-import closeImg from "./close.svg";
-
 export default class MoreTab extends Component {
 
     static KEY = Symbol('MoreTab');
@@ -28,7 +25,11 @@ export default class MoreTab extends Component {
         return (
             <div className={names}
                  onClick={this.onClickHandler}>
-                <img src={arrowImg} alt=""/>
+                <svg width="10px"
+                     height="7px"
+                     viewBox="0 0 10 7">
+                    <path fill="#A8A8A8" d="M 5.5 8 L 10.05 3.5 5.5 -1.05 4.45 0 7.95 3.5 4.45 6.95 5.5 8 M 0.5 8 L 5.05 3.5 0.5 -1.05 -0.55 0 2.95 3.5 -0.55 6.95 0.5 8 Z"/>
+                </svg>
             </div>
         )
     }

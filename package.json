@@ -1,7 +1,7 @@
 {
   "name": "easy-tabs",
-  "version": "0.0.1",
-  "description": "react 实现的折叠面板",
+  "version": "0.1.0",
+  "description": "React 实现的 tabs 组件",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",
   "scripts": {
@@ -37,7 +37,7 @@
     "webpack": "^4.29.5",
     "webpack-cli": "^3.2.3",
     "webpack-dev-server": "^3.2.1",
-    "easy-context-menu": "^0.1.4"
+    "easy-context-menu": "^0.1.5"
   },
   "peerDependencies": {},
   "dependencies": {

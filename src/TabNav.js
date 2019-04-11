@@ -144,7 +144,7 @@ export default class TabNav extends Component {
 
     renderFloatTab() {
         const {activeKey, showCloseButton, panes} = this.props;
-        const {drag} = this.state;
+        const {drag, hideKeys} = this.state;
         if(!drag){
             return;
         }
@@ -168,7 +168,13 @@ export default class TabNav extends Component {
         style.height = paneRect.height + "px";
         style.top = paneRect.y;
         style.left = Math.max(paneRect.x, this.rect.x);
-        style.left = Math.min(style.left, this.rect.width-paneRect.width+this.rect.x);
+        if(hideKeys.length > 0){
+            const moreRect = this.tabSizeMap.get(MoreTab.KEY);
+            style.left = Math.min(style.left, moreRect.x-paneRect.width);
+        }
+        else{
+            style.left = Math.min(style.left, this.rect.width-paneRect.width+this.rect.x);
+        }
         style.cursor = 'grabbing';
         return <Tab style={style} title={paneTitle} selected={true} showCloseButton={showCloseButton}/>
     }
