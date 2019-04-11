@@ -255,6 +255,10 @@ export default class TabNav extends Component {
         const dx = e.pageX - this.lastX;
 
         const {activeKey, panes} = this.props;
+        if(!activeKey || !panes){
+            return;
+        }
+
         const newPanes = panes.concat();
         this.tabSizeMap.get(activeKey).x += dx;
         this.setState({
