@@ -16,6 +16,7 @@ export default class Tabs extends Component {
         customStyle : PropTypes.string,
         activeKey : PropTypes.string,
         editable : PropTypes.bool,
+        draggable : PropTypes.bool,
         onChange : PropTypes.func,
         onClose : PropTypes.func,
         onAdd : PropTypes.func,
@@ -24,7 +25,8 @@ export default class Tabs extends Component {
 
     static defaultProps = {
         activeKey : "",
-        editable : true
+        editable : true,
+        draggable : false
     };
 
     constructor(props) {
@@ -62,7 +64,7 @@ export default class Tabs extends Component {
     }
 
     render() {
-        const {customStyle, activeKey, editable} = this.props;
+        const {customStyle, activeKey, editable, draggable} = this.props;
         this.panes.length = 0;
         const list = React.Children.map(this.props.children, (element, index) => {
             if (!element) {

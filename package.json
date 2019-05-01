@@ -1,6 +1,6 @@
 {
   "name": "easy-drag-tabs",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "React 实现的 tabs 组件",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",

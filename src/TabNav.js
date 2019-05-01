@@ -12,6 +12,7 @@ import TimerHelper from "./TimerHelper";
 export default class TabNav extends Component {
     static propTypes = {
         showCloseButton: PropTypes.bool,
+        draggable: PropTypes.bool,
         activeKey : PropTypes.string,
         panes : PropTypes.array,
         onChange : PropTypes.func,
@@ -236,11 +237,14 @@ export default class TabNav extends Component {
         }
 
         //计时判断拖拽
-        document.addEventListener('mouseup', this.onMouseUpHandler);
-        clearTimeout(this.dragTimeId);
-        this.dragTimeId = TimerHelper.setTimeout(()=>{
-            this.onTabDrag(position);
-        }, this, this.dragDelay);
+        const {draggable} = this.props;
+        if(draggable){
+            document.addEventListener('mouseup', this.onMouseUpHandler);
+            clearTimeout(this.dragTimeId);
+            this.dragTimeId = TimerHelper.setTimeout(()=>{
+                this.onTabDrag(position);
+            }, this, this.dragDelay);
+        }
     }
 
     onTabDrag(position) {

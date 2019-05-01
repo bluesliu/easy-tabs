@@ -33,6 +33,7 @@ export default class App extends Component {
                       onChange={this.onTabsChange}
                       onClose={this.onTabsClose}
                       onSequenceChange={this.onSequenceChange}
+                      draggable={false}
                       customStyle="my-easy-tabs">
                     {this.renderTabs()}
                 </Tabs>
