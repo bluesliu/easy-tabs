@@ -10,6 +10,7 @@ import TabPane from "./TabPane";
 import TabNav from "./TabNav";
 import TabContent from "./TabContent";
 import MoreTab from "./MoreTab";
+import getBoundingClientRect from "./getBoundingClientRect";
 
 export default class Tabs extends Component {
     static propTypes = {
@@ -92,6 +93,7 @@ export default class Tabs extends Component {
         return (
             <div className={names}>
                 <TabNav activeKey={activeKey}
+                        draggable={draggable}
                         showCloseButton={editable}
                         onChange={this.onTabChange}
                         onClose={this.onTabClose}
@@ -158,6 +160,7 @@ export default class Tabs extends Component {
                 {this.getMenuItems()}
             </Menu>
         );
+        console.log(moreRect)
         Menu.Popup(menu, moreRect.x, moreRect.bottom);
     }
 
@@ -166,7 +169,7 @@ export default class Tabs extends Component {
         if(onChange){
             const hideRect = this.tabRectMap.get(key);
             const moreRect = this.tabRectMap.get(MoreTab.KEY);
-            const selfRect = ReactDOM.findDOMNode(this).getBoundingClientRect();
+            const selfRect = getBoundingClientRect(this);
             let oldIdx = this.getPaneIndex(key);
             // let selPane = this.panes[oldIdx];
             let insertIdx = -1;

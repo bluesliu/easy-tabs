@@ -8,6 +8,7 @@ import PropTypes from "prop-types";
 import Tab from "./Tab";
 import MoreTab from "./MoreTab";
 import TimerHelper from "./TimerHelper";
+import getBoundingClientRect from "./getBoundingClientRect";
 
 export default class TabNav extends Component {
     static propTypes = {
@@ -74,7 +75,7 @@ export default class TabNav extends Component {
             if(!ref || !ref.current){
                 return;
             }
-            const rect = ReactDOM.findDOMNode(ref.current).getBoundingClientRect();
+            const rect = getBoundingClientRect(ref.current);
             this.tabSizeMap.set(MoreTab.KEY, rect);
         }
     }
@@ -82,14 +83,14 @@ export default class TabNav extends Component {
     updateRect() {
         this.tabRefMap.forEach((ref, key)=>{
             if(ref.current){
-                const rect = ReactDOM.findDOMNode(ref.current).getBoundingClientRect();
+                const rect = getBoundingClientRect(ref.current);
                 this.tabSizeMap.set(key, rect);
             }
         },this);
     }
 
     updateHideKeys() {
-        this.rect = ReactDOM.findDOMNode(this).getBoundingClientRect();
+        this.rect = getBoundingClientRect(this);
         const {tabSizeMap} = this;
         const {panes} = this.props;
         const hideKeys = [];
